@@ -1,23 +1,22 @@
-import type { LinksFunction } from "@remix-run/node";
-import { Outlet, Link } from "@remix-run/react";
+import { Joke } from ".prisma/client";
+import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
+import { Outlet, Link, useLoaderData } from "@remix-run/react";
 
 import stylesUrl from "~/styles/jokes.css";
+import { db } from "~/utils/db.server";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
 export default function JokesRoute() {
+  const data = useLoaderData<LoaderData>();
   return (
     <div className="jokes-layout">
       <header className="jokes-header">
         <div className="container">
           <h1 className="home-link">
-            <Link
-              to="/"
-              title="Remix Jokes"
-              aria-label="Remix Jokes"
-            >
+            <Link to="/" title="Remix Jokes" aria-label="Remix Jokes">
               <span className="logo">🤪</span>
               <span className="logo-medium">J🤪KES</span>
             </Link>
@@ -30,9 +29,13 @@ export default function JokesRoute() {
             <Link to=".">Get a random joke</Link>
             <p>Here are a few more jokes to check out:</p>
             <ul>
-              <li>
-                <Link to="some-joke-id">Hippo</Link>
-              </li>
+              {data.jokes.map((joke, index) => {
+                return (
+                  <li key={joke.id}>
+                    <Link to={joke.id}>{joke.name}</Link>
+                  </li>
+                );
+              })}
             </ul>
             <Link to="new" className="button">
               Add your own
@@ -46,3 +49,23 @@ export default function JokesRoute() {
     </div>
   );
 }
+
+type JokePartial = Pick<Joke, "id" | "name">;
+
+// export interface Joke {
+//   name: string;
+//   content: string;
+// }
+
+type LoaderData = { jokes: JokePartial[] };
+
+export const loader: LoaderFunction = async () => {
+  const data: LoaderData = {
+    jokes: await db.joke.findMany({
+      take: 5,
+      select: { id: true, name: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  };
+  return json(data);
+};
