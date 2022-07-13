@@ -5,7 +5,7 @@ import {
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
-import { Form, useCatch, useLoaderData, useParams } from "@remix-run/react";
+import { useCatch, useLoaderData, useParams } from "@remix-run/react";
 import { JokeDisplay } from "~/components/joke";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
@@ -56,6 +56,13 @@ export const action: ActionFunction = async ({ request, params }) => {
   return redirect("/jokes");
 };
 
+export function ErrorBoundary() {
+  const { jokeId } = useParams();
+  return (
+    <div className="error-container">{`There was an error loading joke by the id ${jokeId}. Sorry.`}</div>
+  );
+}
+
 export function CatchBoundary() {
   const caught = useCatch();
   const params = useParams();
@@ -85,11 +92,4 @@ export function CatchBoundary() {
       throw new Error(`Unhandled error: ${caught.status}`);
     }
   }
-}
-
-export function ErrorBoundary() {
-  const { jokeId } = useParams();
-  return (
-    <div className="error-container">{`There was an error loading joke by the id ${jokeId}. Sorry.`}</div>
-  );
 }

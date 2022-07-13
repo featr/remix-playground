@@ -14,21 +14,6 @@ export default function JokesIndexRoute() {
   );
 }
 
-export function ErrorBoundary() {
-  return <div className="error-container">I did a whoopsies.</div>;
-}
-
-export function CatchBoundary() {
-  const caught = useCatch();
-
-  if (caught.status === 404) {
-    return (
-      <div className="error-container">There are no jokes to display.</div>
-    );
-  }
-  throw new Error(`Unexpected caught response with status: ${caught.status}`);
-}
-
 type LoaderData = { randomJoke: Pick<Joke, "content" | "id" | "name"> };
 
 export const loader: LoaderFunction = async ({ params }) => {
@@ -51,3 +36,18 @@ export const loader: LoaderFunction = async ({ params }) => {
   const data: LoaderData = { randomJoke };
   return json(data);
 };
+
+export function ErrorBoundary() {
+  return <div className="error-container">I did a whoopsies.</div>;
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+
+  if (caught.status === 404) {
+    return (
+      <div className="error-container">There are no jokes to display.</div>
+    );
+  }
+  throw new Error(`Unexpected caught response with status: ${caught.status}`);
+}

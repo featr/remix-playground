@@ -1,37 +1,12 @@
-import type { User } from "@prisma/client";
 import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
-
 import { db } from "~/utils/db.server";
 import { getUser } from "~/utils/session.server";
 import stylesUrl from "~/styles/jokes.css";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
-};
-
-type LoaderData = {
-  user: {
-    id: string;
-    username: string;
-  } | null;
-  jokeListItems: Array<{ id: string; name: string }>;
-};
-
-export const loader: LoaderFunction = async ({ request }) => {
-  const jokeListItems = await db.joke.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    select: { id: true, name: true },
-  });
-  const user = await getUser(request);
-
-  const data: LoaderData = {
-    jokeListItems,
-    user,
-  };
-  return json(data);
 };
 
 export default function JokesRoute() {
@@ -87,3 +62,26 @@ export default function JokesRoute() {
     </div>
   );
 }
+
+type LoaderData = {
+  user: {
+    id: string;
+    username: string;
+  } | null;
+  jokeListItems: Array<{ id: string; name: string }>;
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const jokeListItems = await db.joke.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    select: { id: true, name: true },
+  });
+  const user = await getUser(request);
+
+  const data: LoaderData = {
+    jokeListItems,
+    user,
+  };
+  return json(data);
+};
